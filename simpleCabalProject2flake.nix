@@ -9,6 +9,8 @@
   system
 , # package name
   name
+, # change haskell packages
+  hp
 , #
   packageNames ? []
 , #
@@ -44,7 +46,7 @@ let
       };
 
       overlayWithHpPreOverrides = final: prev: {
-        haskellPackages = lib.haskellPackagesOverrideComposable prev (hpPreOverrides { inherit pkgs; });
+        haskellPackages = lib.haskellPackagesOverrideComposable prev (hpPreOverrides { inherit pkgs; }) hp;
       };
 
       hpOverrides_ = (
@@ -84,7 +86,7 @@ in
         overlays = ([ self.overlay.${system} ]);
 
         packages = flake-utils.lib.flattenTree
-          (getAttrs packageNames_ pkgs.haskellPackages);
+          (getAttrs packageNames_ hp);
 
         defaultPackage = self.packages.${system}.${name};
 
@@ -98,11 +100,11 @@ in
           then maybeImport shell
           else
             {pkgs, ...}:
-            pkgs.haskellPackages.shellFor {
-              packages = _: pkgs.lib.attrsets.attrVals packageNames_ pkgs.haskellPackages;
+            hp.shellFor {
+              packages = _: pkgs.lib.attrsets.attrVals packageNames_ hp;
               withHoogle = shellWithHoogle;
               buildInputs = (
-                with pkgs.haskellPackages; ([
+                with hp; ([
                   ghcid
                   cabal-install
                 ])

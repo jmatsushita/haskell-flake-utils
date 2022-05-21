@@ -9,6 +9,8 @@
   system
 , # package name
   name
+, # change haskell packages
+  hp
 , # nixpkgs config
   config ? { }
 , # add another haskell flakes as requirements
@@ -37,7 +39,7 @@ let
       };
 
       overlayWithHpPreOverrides = final: prev: {
-        haskellPackages = lib.haskellPackagesOverrideComposable prev (hpPreOverrides { inherit pkgs; });
+        haskellPackages = lib.haskellPackagesOverrideComposable prev (hpPreOverrides { inherit pkgs; }) hp;
       };
 
       hpOverrides_ = (
@@ -83,11 +85,11 @@ in
           then maybeImport shell
           else
             {pkgs, ...}:
-            pkgs.haskellPackages.shellFor {
-              packages = _: [ pkgs.haskellPackages.${name} ];
+            hp.shellFor {
+              packages = _: [hp.${name} ];
               withHoogle = shellWithHoogle;
               buildInputs = (
-                with pkgs.haskellPackages; ([
+                with hp; ([
                   ghcid
                   cabal-install
                 ])

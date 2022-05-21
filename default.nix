@@ -4,8 +4,8 @@ let
   simpleCabal2flake = import ./simpleCabal2flake.nix { inherit lib flake-utils; };
   simpleCabalProject2flake = import ./simpleCabalProject2flake.nix { inherit lib flake-utils; };
 
-  haskellPackagesOverrideComposable = pkgs: hpOverrides:
-    pkgs.haskellPackages.override (oldAttrs: {
+  haskellPackagesOverrideComposable = pkgs: hpOverrides: hp:
+    hp.override (oldAttrs: {
       overrides =
         pkgs.lib.composeExtensions
           (oldAttrs.overrides or (_: _: { }))
