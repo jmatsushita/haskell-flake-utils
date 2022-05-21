@@ -65,7 +65,7 @@ let
         );
 
       overlayOur = final: prev: {
-        haskellPackages = lib.haskellPackagesOverrideComposable prev hpOverrides_;
+        haskellPackages = lib.haskellPackagesOverrideComposable prev hpOverrides_ hp;
       };
 
       packageNames_ = pkgs.lib.lists.unique ([ name ] ++ packageNames);

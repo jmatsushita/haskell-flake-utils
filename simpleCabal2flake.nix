@@ -51,7 +51,7 @@ let
         );
 
       overlayOur = final: prev: {
-        haskellPackages = lib.haskellPackagesOverrideComposable prev hpOverrides_;
+        haskellPackages = lib.haskellPackagesOverrideComposable prev hpOverrides_ hp;
       };
 
       getAttrs = names: attrs: pkgs.lib.attrsets.genAttrs names (n: attrs.${n});
