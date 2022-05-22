@@ -1,4 +1,7 @@
-{ lib, flake-utils }: with lib;
+{ lib
+, flake-utils
+, defaultSystems ? [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ]
+}: with lib;
 # This function returns a flake outputs-compatible schema.
 {
   # pass an instance of self
@@ -9,6 +12,8 @@
   system
 , # package name
   name
+, # systems
+  systems ? defaultSystems
 , #
   packageNames ? []
 , #
@@ -80,29 +85,28 @@ let
 
       getAttrs = names: attrs: pkgs.lib.attrsets.genAttrs names (n: attrs.${n});
 
-in
+      outputs = flake-utils.lib.eachSystem systems (system:
+        {
+
+          packages = flake-utils.lib.flattenTree
+            (getAttrs packageNames_ pkgs.haskellPackages);
+
+        }
+      )
+      //
       {
+        defaultPackage = self.packages.${system}.${name};
 
         overlay = final: prev: prev.lib.composeManyExtensions ([ ]
           ++ preOverlays
-          ++ (map (fl: fl.overlay.${system}) haskellFlakes)
+          ++ (map (fl: fl.overlay) haskellFlakes)
           ++ (loadOverlay preOverlay)
           ++ [ overlayWithHpPreOverrides ]
           ++ [ overlayOur ]
           ) final prev;
 
-        overlays = ([ self.overlay.${system} ]);
+        overlays = ([ self.overlay ]);
 
-        packages = flake-utils.lib.flattenTree
-          (getAttrs packageNames_ pkgs.haskellPackages);
-
-        defaultPackage = self.packages.${system}.${name};
-
-      }
-
-      //
-
-      {
         devShell = (
           if shell != null
           then maybeImport shell
@@ -121,5 +125,9 @@ in
               );
             }
         ) { inherit pkgs; };
-      }
+      };
+
+in
+
+outputs
 
